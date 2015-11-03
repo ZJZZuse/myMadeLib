@@ -5,71 +5,108 @@ import urllib
 import sys
 import socket, ftplib
 from pyquery import PyQuery as pq
-from myMadeLib import MyCommonToolsZ
+import myCommonToolsZ as zTools
+import html2text
+import os
 
-zTools = MyCommonToolsZ.MyCommonToolsZ
+'''
+common use for other file
+'''
+# pq = mySpiderTools.pq
+# acqHtml = mySpiderTools.tryGetHtml
+# myDecodeHtml = mySpiderTools.myDecodeHtml
 
-class MySpiderTools:
+
+h = html2text.HTML2Text()
+h.ignore_links = True
+
+timeout = 10  # in seconds
+
+
+class MySpiderCfg:
+    baseUrl = 'http://yhyz.6000y.com'
+    mainActionUrl = 'http://yhyz.6000y.com/news/news_140_%d.html'
+    baseFilePath = 'F:/more/illusion/other/ling/other/text/aisirenText2/%s.txt'
+
+    def __init__(self, baseUrl, mainActionUrl, baseFilePath):
+        '''
+
+        :param baseUrl:
+        :param mainActionUrl:
+        :param baseFilePath:
+        :return:
+        '''
+        self.baseUrl = baseUrl
+        self.mainActionUrl = mainActionUrl
+        self.baseFilePath = baseFilePath
+
+
+def setdefaulttimeout(timeout):
+    socket.setdefaulttimeout(timeout)
+
+
+setdefaulttimeout(timeout)
+
+
+def myDecodeHtml(content):
+    return h.handle(content.strip())
+
+
+def downLoadResource(fileName, url, goalTime=3, passIfExist=True):
     '''
-    MySpiderTools
+
+    :param fileName:
+    :param url:
+    :param goalTime:
+    :param passIfExist:
+    :return:
     '''
-    timeout = 10  # in seconds
+    if os.path.exists(fileName):
+        return False
 
-    @classmethod
-    def setdefaulttimeout(cls):
-        socket.setdefaulttimeout(cls.timeout)
+    for i in range(0, goalTime):
 
-    @staticmethod
-    def downLoadResource(fileName, url, goalTime = 3):
-        tryTime = 0
-        while True:
-            print 'start downLoad'
+        if (i > 0):
+            print 'now index is %d for %s' % (i, fileName)
 
-            if (tryTime >= goalTime):
-                print 'had tried %d time(s),but failed!' % goalTime
-                return
-
-            if (tryTime > 0):
-                print 'had tried %d time(s) for' % tryTime, fileName
-
-            try:
-                urllib.urlretrieve(url, fileName)
-                print 'had downloaded %s' % fileName
-                break
-            except Exception, e:
-                # urllib.urlretrieve(urlT,fileName.decode('utf-8'))
-                try:
-                    os.remove(fileName)
-                except Exception, e:
-                    zTools.commonErrorPrint(e)
-
-                zTools.commonErrorPrint(e)
-            finally:
-                tryTime += 1
-    @classmethod
-    def getHtml(cls,url, tryCount=3):
-        i = 0
-
-        while i < tryCount:
-
-            c = cls.getHtmlI(url)
-
-            if c != '':
-                return c
-            else:
-                i += 1
-
-        return ''
-
-    @classmethod
-    def getHtmlI(cls,url):
         try:
-            page = urllib.urlopen(url)
-            html = page.read()
-            return html
+            urllib.urlretrieve(url, fileName)
+            print 'downloaded %s' % fileName
+            return True
         except Exception, e:
-            print e.__class__, e
-            return ''
+            # urllib.urlretrieve(urlT,fileName.decode('utf-8'))
+            try:
+                os.remove(fileName)
+            except Exception, e:
+                zTools.commonErrorPrint(e)
+
+            zTools.commonErrorPrint(e)
+
+        if (i == goalTime - 1):
+            print 'now index is %d for %s,but failed' % (i, fileName)
+
+    return False
 
 
-MySpiderTools.setdefaulttimeout()
+def tryGetHtml(url, tryCount=3):
+    for i in range(0, tryCount):
+
+        if i > 0:
+            print '%s,now index is %s' % (sys._getframe().f_back.f_code.co_name, i)
+
+        try:
+            c = getHtml(url)
+            return c
+        except Exception, e:
+            zTools.commonErrorPrint(e)
+
+
+tryAcqHtml = tryGetHtml
+
+
+def getHtml(url):
+    # page = urllib.urlopen(url,proxies={'http':"http://222.79.72.120:8090"})
+    page = urllib.urlopen(url)
+
+    html = page.read()
+    return html
