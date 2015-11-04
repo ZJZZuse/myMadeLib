@@ -4,8 +4,20 @@ __author__ = 'Zhang'
 import sys
 import os
 import codecs
+import tryActionMEthodDecorator
 
 typeEncode = sys.getfilesystemencoding()  ##系统默认编码
+
+def fireActionTimes(fn, times = 1):
+    '''
+    执行fn相应的次数
+    :param fn:
+    :param times:
+    :return:
+    '''
+    for i in range(0, times):
+        fn()
+
 
 def emptyOrNoneAll(*items):
     '''
@@ -47,17 +59,20 @@ def mkDir(dirName, passIfExist = True):
     os.mkdir(dirName)
     return True
 
+@tryActionMEthodDecorator.tryActionMEthod(3)
+def tryMkdir(dirName, passIfExist = True):
+     return mkDir(dirName, passIfExist)
 
-def tryMkdir(dirName, times=3):
-    for i in (0, times):
-
-        if i > 0:
-            print 'now index is %d' % i
-
-        try:
-            os.mkdir(dirName)
-            return True
-        except Exception, e:
-            print e, 'at make dir %s' % dirName
-
-    return False
+# def tryMkdir(dirName, times=3):
+#     for i in (0, times):
+#
+#         if i > 0:
+#             print 'now index is %d' % i
+#
+#         try:
+#             os.mkdir(dirName)
+#             return True
+#         except Exception, e:
+#             print e, 'at make dir %s' % dirName
+#
+#     return False

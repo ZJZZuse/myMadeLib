@@ -12,7 +12,7 @@ class MySpiderCfg:
     mainActionUrl = 'http://yhyz.6000y.com/news/news_140_%d.html'
     baseFilePath = 'F:/more/illusion/other/ling/other/text/aisirenText2/%s.txt'
 
-    def __init__(self, name, baseUrl, mainActionUrl, baseFilePath):
+    def __init__(self, baseUrl, mainActionUrl,range = range(0,1), baseFilePath=None, name='default'):
         '''
 
         :param name:
@@ -26,3 +26,10 @@ class MySpiderCfg:
         self.mainActionUrl = mainActionUrl
         self.baseFilePath = baseFilePath
         self.name = name
+        self.range = range
+
+        self.iter = self.generateIter()
+
+    def generateIter(self):
+        for i in self.range:
+            yield self.mainActionUrl % i
