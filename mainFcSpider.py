@@ -1,4 +1,16 @@
 # coding=utf-8
+
+# RANGE_MAIN = range(1, 7)
+# MAIN_URL = 'http://www.yxdown.com/zj/Catalog_199_softTime_%d.html'
+# DB_PATH = 'D:/abc/download/games.db'
+# TABLENAME = 'MDGamesFromYouxun'
+
+RANGE_MAIN = range(1, 3+1)
+MAIN_URL = 'http://www.yxdown.com/zj/Catalog_298_softTime_%d.html'
+DB_PATH = 'D:/abc/download/games.db'
+TABLENAME = 'otherGamesFromYouxun'
+
+
 __author__ = 'wb-zhangjinzhong'
 
 import mySpiderTools
@@ -39,29 +51,29 @@ gameMetaCfg = {
     'tag': '',
     'zt_text': '',
     'pf_score': FloatCol(),
+    'commentCount':IntCol(),
     'pf_score_des': '',
     'game_des': '',
-    'gameUrl': ''
+    'gameUrl': '',
+    'commentAll':''
 }
 
 
 
 def initDate():
-    myDataTools.DataWrapper.initDb('games.db')
-
-    global mainItems, gameItems, mySpiderCfgMain, wrapper, countT
 
 
+    myDataTools.DataWrapper.initDb(DB_PATH)
 
-    countT = int(0)
+    global mainItems, gameItems, mySpiderCfgMain, wrapper
 
-    wrapper = myDataTools.DataWrapper('fgGamesFromYouxun', myDataTools.DataWrapper.wrappeByCommonFieldCfg(gameMetaCfg))
+    wrapper = myDataTools.DataWrapper(TABLENAME, myDataTools.DataWrapper.wrappeByCommonFieldCfg(gameMetaCfg))
 
     mainItems = Queue.Queue(500)
     gameItems = Queue.Queue(500)
 
     mySpiderCfgMain = mySpiderCfg.MySpiderCfg('http://www.yxdown.com',
-                                              'http://www.yxdown.com/zj/Catalog_182_softTime_%d.html', range(1, 42))
+                                              MAIN_URL, RANGE_MAIN)
 
     mySpiderCfgMain.countT = 0
     mySpiderCfgMain.addCount = 0
@@ -124,18 +136,20 @@ def dealCertainItem():
             id = q.find('#softid').val()
 
             if id == None:
-                return -1.0
+                return -1.0,-1
 
             try:
                 objT = json.loads(
                     acqHtml('http://dy.www.yxdown.com/open/op.ashx?action=/soft/votes/data.json&sid=%s' % id))
             except:
                 print 'http://dy.www.yxdown.com/open/op.ashx?action=/soft/votes/data.json&sid=%s' % id
-                return -1.0
+                return -1.0,-1
 
             r = objT['Score']
 
-            return r
+            commentCount = objT['Normal']+objT['DOWN']+objT['UP']
+
+            return r,commentCount
 
         def acqImg():
             r = ''
@@ -157,12 +171,33 @@ def dealCertainItem():
 
             return r
 
+        def acqCommentAll():
+            id = q.find('#softid').val()
+
+            if id == None:
+                return ''
+
+            try:
+                objT = json.loads(
+                    acqHtml('http://dy.www.yxdown.com/open/op.ashx?action=/soft/votes/data.json&sid=%s' % id))
+            except:
+                print 'http://dy.www.yxdown.com/open/op.ashx?action=/soft/votes/data.json&sid=%s' % id
+                return -1.0,-1
+
+            r = objT['Score']
+
+            commentCount = objT['Normal']+objT['DOWN']+objT['UP']
+
+            return r,commentCount
+
         if q.find('h1[itemprop=name]').text().strip() == '':
             continue
 
+        rt = acqScore()
+
         gameObj = {
             'name': q.find('h1[itemprop=name]').text().strip(),
-            'softwareVersion': 'fc',
+            'softwareVersion': q.find('span[itemprop=softwareVersion]').text().strip(),
             'ename': q.find('span.ename').text().strip(),
             'img': acqImg(),
             'gameType': q.find('div.dl>dl>dt>span:eq(0)>b:eq(0)>a').text(),
@@ -174,10 +209,12 @@ def dealCertainItem():
             'operatingSystem': q.find('div.dl>dl>dt>span:eq(3) a').text(),
             'tag': q.find('div.dl>dl>dt>span:eq(4)>em').text(),
             'zt_text': q.find('div.dl>dl>dt>span:eq(5)>em').text(),
-            'pf_score': acqScore(),
+            'pf_score': rt[0],
+            'commentCount':rt[1],
             'pf_score_des': q.find('div.pinja_box').text().strip(),
             'game_des': mySpiderTools.myDecodeHtml(q.find('li.yx1>span').text().strip()),
-            'gameUrl': urlT
+            'gameUrl': urlT,
+            'commentAll': mySpiderTools.myDecodeHtml(q.find('#commentsWrap').text().strip()),
         }
 
         if len(gameObj['name']) != 0:
@@ -201,7 +238,11 @@ def storeGames():
 
         item = gameItems.get()
 
-        wrapper.add(item)
+        try:
+            wrapper.add(item)
+        except:
+            print 'wrapper.add(item) wrong at %s' % item
+
 
         print 'index is %d,added %s' % (mySpiderCfgMain.addCount,item['name'])
 
