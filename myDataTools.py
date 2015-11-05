@@ -9,7 +9,11 @@ import os
 
 # class tc(SQLObject):
 #     pass
-
+#
+#
+# t = tc.selectBy()
+#
+# t.count()
 
 class DataWrapper:
     '''
@@ -22,9 +26,8 @@ class DataWrapper:
 
     goalClass = None
 
-
     @classmethod
-    def wrappeByCommonFieldCfg(cls,p):
+    def wrappeByCommonFieldCfg(cls, p):
         '''
         添加常用配置，不覆盖客户同名配置
         :param p:
@@ -32,7 +35,7 @@ class DataWrapper:
         '''
 
         pt = cls.commonFieldCfg.copy()
-        #覆盖客户值
+        # 覆盖客户值
         pt.update(p)
 
         return pt
@@ -48,7 +51,11 @@ class DataWrapper:
 
         connection_string = 'sqlite:' + db_filename
         connection = connectionForURI(connection_string)
+
+        connection.dbEncoding = 'utf-8'
+
         sqlhub.processConnection = connection
+
 
     @staticmethod
     def initFields(fields):
@@ -58,8 +65,8 @@ class DataWrapper:
         :return:
         '''
         for key in iter(fields):
-            if len(fields[key]) == 0 :
-                fields[key] == StringCol()
+            if isinstance(fields[key], str) and len(fields[key]) == 0:
+                fields[key] = StringCol()
 
     def __init__(self, tableName, fields):
 
@@ -67,9 +74,13 @@ class DataWrapper:
 
         self.goalClass = classobj(tableName, (SQLObject,), fields)
 
+        # self.goalClass._connection.debug = True
+
         db_filename = os.path.abspath('sqlitePath')
 
         self.goalClass.createTable(True)
+
+
 
     def reCreateTable(self):
         self.goalClass.dropTable(True)
@@ -90,9 +101,9 @@ class DataWrapper:
 if __name__ == '__main__':
     DataWrapper.initDb('dataT/data.db')
 
-    wrapper = DataWrapper('t',DataWrapper.wrappeByCommonFieldCfg({'content':StringCol()}))
+    wrapper = DataWrapper('t', DataWrapper.wrappeByCommonFieldCfg({'content': StringCol()}))
 
     # wrapper.reCreateTable()
 
     # wrapper.add(name = 'b')
-    wrapper.add({'name': 'a','content':'c1'})
+    wrapper.add({'name': 'a', 'content': u'中文'})
