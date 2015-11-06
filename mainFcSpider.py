@@ -5,11 +5,10 @@
 # DB_PATH = 'D:/abc/download/games.db'
 # TABLENAME = 'MDGamesFromYouxun'
 
-RANGE_MAIN = range(1, 3+1)
-MAIN_URL = 'http://www.yxdown.com/zj/Catalog_298_softTime_%d.html'
+RANGE_MAIN = range(1, 7 + 1)
+MAIN_URL = 'http://www.yxdown.com/zj/Catalog_375_softTime_%d.html'
 DB_PATH = 'D:/abc/download/games.db'
-TABLENAME = 'otherGamesFromYouxun'
-
+TABLENAME = 'fcChineseGamesFromYouxun'
 
 __author__ = 'wb-zhangjinzhong'
 
@@ -29,10 +28,10 @@ import time
 import thread
 
 import json
+
 '''
 0.1beta,基本能正常运行，还有游戏类型，线程自动终止的问题。适合于解析游讯网，能解析大部分游戏
 '''
-
 
 acqHtml = mySpiderTools2.tryAcqHtml
 
@@ -51,18 +50,15 @@ gameMetaCfg = {
     'tag': '',
     'zt_text': '',
     'pf_score': FloatCol(),
-    'commentCount':IntCol(),
+    'commentCount': IntCol(),
     'pf_score_des': '',
     'game_des': '',
     'gameUrl': '',
-    'commentAll':''
+    'commentAll': ''
 }
 
 
-
 def initDate():
-
-
     myDataTools.DataWrapper.initDb(DB_PATH)
 
     global mainItems, gameItems, mySpiderCfgMain, wrapper
@@ -77,6 +73,7 @@ def initDate():
 
     mySpiderCfgMain.countT = 0
     mySpiderCfgMain.addCount = 0
+
 
 def main():
     '''
@@ -136,20 +133,20 @@ def dealCertainItem():
             id = q.find('#softid').val()
 
             if id == None:
-                return -1.0,-1
+                return -1.0, -1
 
             try:
                 objT = json.loads(
                     acqHtml('http://dy.www.yxdown.com/open/op.ashx?action=/soft/votes/data.json&sid=%s' % id))
             except:
                 print 'http://dy.www.yxdown.com/open/op.ashx?action=/soft/votes/data.json&sid=%s' % id
-                return -1.0,-1
+                return -1.0, -1
 
             r = objT['Score']
 
-            commentCount = objT['Normal']+objT['DOWN']+objT['UP']
+            commentCount = objT['Normal'] + objT['DOWN'] + objT['UP']
 
-            return r,commentCount
+            return r, commentCount
 
         def acqImg():
             r = ''
@@ -178,17 +175,25 @@ def dealCertainItem():
                 return ''
 
             try:
-                objT = json.loads(
-                    acqHtml('http://dy.www.yxdown.com/open/op.ashx?action=/soft/votes/data.json&sid=%s' % id))
+                strT = acqHtml(
+                    'http://pl.yxdown.com/ping.ashx/hot.js?key=soft&vote=6&sid=%s&count=10&callback=window.Pinglun.GetHotCommentsCallback()&encoding=gb2312' % id)
+
+                strT = strT[strT.index('= {') + 2:strT.index(';window.Pinglun.GetHot')]
+
+                objT = json.loads(strT)
+
+                strRs = []
+
+                for item in objT['comments']:
+                    strRs.append('%s,%s:%s @%s\n'%(item['city'],item['ip'],item['content'],item['datetime']))
+
+                return ''.join(strRs)
+
             except:
-                print 'http://dy.www.yxdown.com/open/op.ashx?action=/soft/votes/data.json&sid=%s' % id
-                return -1.0,-1
+                print 'http://pl.yxdown.com/ping.ashx/hot.js?key=soft&vote=6&sid=%s&count=10&callback=window.Pinglun.GetHotCommentsCallback($data)&encoding=gb2312' % id
+                print strT
+                return ''
 
-            r = objT['Score']
-
-            commentCount = objT['Normal']+objT['DOWN']+objT['UP']
-
-            return r,commentCount
 
         if q.find('h1[itemprop=name]').text().strip() == '':
             continue
@@ -210,23 +215,22 @@ def dealCertainItem():
             'tag': q.find('div.dl>dl>dt>span:eq(4)>em').text(),
             'zt_text': q.find('div.dl>dl>dt>span:eq(5)>em').text(),
             'pf_score': rt[0],
-            'commentCount':rt[1],
+            'commentCount': rt[1],
             'pf_score_des': q.find('div.pinja_box').text().strip(),
             'game_des': mySpiderTools.myDecodeHtml(q.find('li.yx1>span').text().strip()),
             'gameUrl': urlT,
-            'commentAll': mySpiderTools.myDecodeHtml(q.find('#commentsWrap').text().strip()),
+            'commentAll':acqCommentAll(),
         }
 
         if len(gameObj['name']) != 0:
             gameItems.put(gameObj)
-            print 'now index is %d,put %s' %(mySpiderCfgMain.countT ,gameObj['name'])
+            print 'now index is %d,put %s' % (mySpiderCfgMain.countT, gameObj['name'])
 
             # lockT = thread.allocate_lock()
 
             # lockT.acquire()
             mySpiderCfgMain.countT += 1
             # lockT.release()
-
 
 
 def storeGames():
@@ -243,8 +247,7 @@ def storeGames():
         except:
             print 'wrapper.add(item) wrong at %s' % item
 
-
-        print 'index is %d,added %s' % (mySpiderCfgMain.addCount,item['name'])
+        print 'index is %d,added %s' % (mySpiderCfgMain.addCount, item['name'])
 
         mySpiderCfgMain.addCount += 1
     pass
@@ -269,4 +272,3 @@ if __name__ == '__main__':
     #     b()
     #
     # a()
-
