@@ -27,10 +27,9 @@ def tryAction(action, times=3):
         except Exception, e:
             traceback.print_exc()
 
-    print 'failed,after having tried %s time(s)' % times
+    # print 'failed,after having tried %s time(s)' % times
 
-    return False
-
+    raise Exception('tryActionExcetion,failed,after having tried %s time(s)' % times)
 
 def tryActionMEthod(times):
     '''

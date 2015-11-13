@@ -32,8 +32,11 @@ def emptyOrNoneAll(*items):
     return True
 
 
-def decodeForThisSys(content,encoding='gb2312'):
-    return content.decode(encoding,'ignore').encode(typeEncode)
+def decodeForThisSys(content,errors = 'ignore',encodeErrors = 'strict',encoding='gb2312'):
+    return content.decode(encoding,errors).encode(typeEncode,encodeErrors)
+
+def decodeMy(content,gEncode  = 'gb2312',goalEncode = 'utf-8'):
+    return content.decode(gEncode).encode(goalEncode)
 
 def commonErrorPrint(e):
     s = sys.exc_info()
