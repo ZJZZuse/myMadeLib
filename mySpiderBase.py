@@ -148,7 +148,10 @@ class MySpiderBase:
 
                 return
 
-            item = self.mainItems.get()
+            try:
+                item = self.mainItems.get(timeout=10)
+            except:
+                continue
 
             rt = self.acqCertainItemsSingle(item,self.mySpiderCfgMain.acqCount)
 
@@ -177,10 +180,15 @@ class MySpiderBase:
 
             if self.acqCertainItemsIsDone and self.certainItems.empty():
 
-                print 'saveCertainItems done in %s' % threading.current_thread.__name__
+                print 'saveCertainItems done in %s' % threading.current_thread
                 return
 
-            item = self.certainItems.get()
+
+            try:
+                item = self.certainItems.get(timeout=10)
+            except:
+                continue
+
 
             try:
                 self.wrapper.add(item)
