@@ -9,6 +9,7 @@ class MySpiderCfg:
     name = 'default'
 
     baseUrl = '基础地址，通常用于页面省略地址补全'
+    specialMainActionUrl = ()
     mainActionUrl = 'http://yhyz.6000y.com/news/news_140_%d.html'
     baseFilePath = 'F:/more/illusion/other/ling/other/text/aisirenText2/%s.txt'
 
@@ -31,5 +32,9 @@ class MySpiderCfg:
         self.iter = self.generateIter()
 
     def generateIter(self):
+
+        for ele in self.specialMainActionUrl:
+            yield ele
+
         for i in self.range:
             yield self.mainActionUrl % i

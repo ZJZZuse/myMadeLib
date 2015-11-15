@@ -49,6 +49,9 @@ def writeFile(path, text,encoding = 'utf-8', passIfExist=True):
     with codecs.open(path, 'w',encoding)  as f:  # r只读，w可写，a追加
         f.write(text)
 
+def replaceCRLF(content):
+    return content.replace('\n','\r\n')
+
 def mkDir(dirName, passIfExist = True):
     '''
     创建文件夹
@@ -79,3 +82,6 @@ def tryMkdir(dirName, passIfExist = True):
 #             print e, 'at make dir %s' % dirName
 #
 #     return False
+
+if __name__=='__main__':
+    writeFile(u'D:/data/text/askTao/中文.txt',u'a中文\r\na')

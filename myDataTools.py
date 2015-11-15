@@ -4,8 +4,10 @@ __author__ = 'wb-zhangjinzhong'
 from sqlobject import *
 from new import classobj
 
+import myCommonToolsZ as tz
 import os
 
+import traceback
 
 # class tc(SQLObject):
 #     pass
@@ -20,8 +22,8 @@ class DataWrapper:
     数据库包裹，暂时只支持sqlite，
     '''
     commonFieldCfg = {
-        'name': StringCol(),
-        '_createTime': DateTimeCol()
+        # 'name': StringCol(),
+        'info_createTime': DateTimeCol()
     }
 
     goalClass = None
@@ -54,8 +56,11 @@ class DataWrapper:
 
         connection.dbEncoding = 'utf-8'
 
+        connection.autoCommit = False
+
         sqlhub.processConnection = connection
 
+        cls.connection = connection
 
     @staticmethod
     def initFields(fields):
@@ -80,16 +85,15 @@ class DataWrapper:
 
         self.goalClass.createTable(True)
 
-
-
     def reCreateTable(self):
         self.goalClass.dropTable(True)
         self.goalClass.createTable()
 
     def add(self, p):
 
-        if hasattr(self.goalClass, '_createTime'):
-            p['_createTime'] = DateTimeCol.now()
+        if hasattr(self.goalClass, 'info_createTime'):
+            p['info_createTime'] = DateTimeCol.now()
+            # .strftime('%Y-%m-%d %H:%M:%S.%f')
 
         self.goalClass(**p)
 
@@ -97,13 +101,47 @@ class DataWrapper:
         for item in items:
             self.add(item)
 
+    def exportTxt(self, dirName, getFileName, getFileContent, selectP):
+
+        tz.mkDir(dirName)
+
+        objs = self.goalClass.select(selectP)
+
+        successCount = 0
+        wrongCount = 0
+        wrongs = []
+
+        for ele in objs:
+            fileName = getFileName(ele).decode('utf-8')
+            content = getFileContent(ele).decode('utf-8')
+
+            try:
+                tz.writeFile(dirName + '/%s.txt' % fileName, content)
+                successCount += 1
+            except Exception,e:
+                wrongCount += 1
+                wrongs.append(fileName)
+                traceback.print_exc()
+                # raise e
+
+        lenT = objs.count()
+        print '%d/%d,success,%d failed.failed @ %s'%(successCount,lenT,wrongCount,wrongs)
+
+
+    @classmethod
+    def commit(cls):
+        cls.connection.getConnection().commit()
+
 
 if __name__ == '__main__':
-    DataWrapper.initDb('dataT/data.db')
+    # DataWrapper.initDb('dataT/data.db')
+    #
+    # wrapper = DataWrapper('t', DataWrapper.wrappeByCommonFieldCfg({'content': StringCol()}))
+    #
+    # # wrapper.reCreateTable()
+    #
+    # # wrapper.add(name = 'b')
+    # wrapper.add({'name': 'a', 'content': u'中文'})
 
-    wrapper = DataWrapper('t', DataWrapper.wrappeByCommonFieldCfg({'content': StringCol()}))
+    print u'中文'
 
-    # wrapper.reCreateTable()
-
-    # wrapper.add(name = 'b')
-    wrapper.add({'name': 'a', 'content': u'中文'})

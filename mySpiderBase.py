@@ -28,6 +28,7 @@ class MySpiderBase:
     基础自定义爬虫类，简单的爬虫继承该类即可，覆写acqMainItemsAcqItems，acqMainItemsPutToQ，acqCertainItemsSingle
     '''
     rangeMain = range(1, 7 + 1)
+    specialMainActionUrl = ()
     mainUrl = 'http://www.yxdown.com/zj/Catalog_375_softTime_%d.html'
     baseUrl = 'http:www.baidu.com'
     dbPath = 'D:/abc/download/games.db'
@@ -80,6 +81,9 @@ class MySpiderBase:
         self.certainItems = Queue.Queue(self.certainItemsSize)
         self.mySpiderCfgMain = mySpiderCfg.MySpiderCfg(self.baseUrl,
                                                        self.mainUrl, self.rangeMain)
+
+        self.mySpiderCfgMain.specialMainActionUrl = self.specialMainActionUrl
+
         self.mySpiderCfgMain.savedCount = 0
         self.mySpiderCfgMain.acqCount = 0
 
@@ -111,14 +115,17 @@ class MySpiderBase:
 
             except StopIteration, e:
                 self.mainIsDone = True
-                print 'acqMainItems done in %s' % threading.current_thread.__name__
+                print 'acqMainItems done in %s' % threading.currentThread().name
                 return
 
             items = self.acqMainItemsAcqItems(page)
 
             for item in items:
-                itemT = pq(item)
+                itemT = self.preDealWithItem(item)
                 self.acqMainItemsPutToQ(itemT)
+
+    def preDealWithItem(self,item):
+        return pq(item)
 
     def acqMainItemsAcqItems(self, page):
         '''
@@ -144,7 +151,7 @@ class MySpiderBase:
 
             if self.mainIsDone and self.mainItems.empty():
                 self.acqCertainItemsIsDone = True
-                print 'acqCertainItems done in %s' % threading.current_thread.__name__
+                print 'acqCertainItems done in %s' % threading.currentThread().name
 
                 return
 
@@ -180,7 +187,10 @@ class MySpiderBase:
 
             if self.acqCertainItemsIsDone and self.certainItems.empty():
 
-                print 'saveCertainItems done in %s' % threading.current_thread
+                self.wrapper.commit()
+
+                print 'saveCertainItems done in %s' % threading.currentThread().name
+
                 return
 
 

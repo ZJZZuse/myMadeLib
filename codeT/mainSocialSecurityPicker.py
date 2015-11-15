@@ -29,7 +29,7 @@ class MySpiderT(mySpiderBase.MySpiderBase):
     rangeMain = range(1, 2 + 1)
     mainUrl = 'http://www.zjhz.lss.gov.cn/html/jlhd/ckhf.html?qry_useridcard=&qry_username=&_currpage=%d&_pagelines=20&_rowcount=4646'
     baseUrl = 'http://www.zjhz.lss.gov.cn'
-    dbPath = 'D:/abc/download/shebao.db'
+    dbPath = 'f:/abc/download/shebao.db'
     tableName = 'sheBaoFAQ'
 
     mainItemsSize = 50
