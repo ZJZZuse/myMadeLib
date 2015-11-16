@@ -27,10 +27,20 @@ class MySpiderBase:
     '''
     基础自定义爬虫类，简单的爬虫继承该类即可，覆写acqMainItemsAcqItems，acqMainItemsPutToQ，acqCertainItemsSingle
     '''
-    rangeMain = range(1, 7 + 1)
-    specialMainActionUrl = ()
-    mainUrl = 'http://www.yxdown.com/zj/Catalog_375_softTime_%d.html'
-    baseUrl = 'http:www.baidu.com'
+
+    mySpiderCfgCfg = {
+
+        'baseUrl': u'基础地址，通常用于页面省略地址补全',
+
+        'specialMainActionUrl': (),
+
+        #common is address
+        'mainActionUrl': False,
+        # such as mainActionUrls = ({'url': '', 'range': range(1,3 + 1)},)
+        'mainActionUrls': ()
+
+    }
+
     dbPath = 'D:/abc/download/games.db'
     tableName = 'fcChineseGamesFromYouxun'
 
@@ -68,7 +78,6 @@ class MySpiderBase:
     acqCertainItemsIsDone = False
 
     def __init__(self):
-
         self.initDate()
 
     def initDate(self):
@@ -79,8 +88,7 @@ class MySpiderBase:
 
         self.mainItems = Queue.Queue(self.mainItemsSize)
         self.certainItems = Queue.Queue(self.certainItemsSize)
-        self.mySpiderCfgMain = mySpiderCfg.MySpiderCfg(self.baseUrl,
-                                                       self.mainUrl, self.rangeMain)
+        self.mySpiderCfgMain = mySpiderCfg.MySpiderCfg(self.mySpiderCfgCfg)
 
         self.mySpiderCfgMain.specialMainActionUrl = self.specialMainActionUrl
 
@@ -127,7 +135,7 @@ class MySpiderBase:
     def acqMainPage(self):
         return acqHtml(self.mySpiderCfgMain.iter.next())
 
-    def preDealWithItem(self,item):
+    def preDealWithItem(self, item):
         return pq(item)
 
     def acqMainItemsAcqItems(self, page):
@@ -163,7 +171,7 @@ class MySpiderBase:
             except:
                 continue
 
-            rt = self.acqCertainItemsSingle(item,self.mySpiderCfgMain.acqCount)
+            rt = self.acqCertainItemsSingle(item, self.mySpiderCfgMain.acqCount)
 
             if rt[0]:
                 self.mySpiderCfgMain.acqCount += 1
@@ -172,7 +180,7 @@ class MySpiderBase:
     def getItemInfo(self, item):
         return item
 
-    def acqCertainItemsSingle(self, itemMain,acqCount):
+    def acqCertainItemsSingle(self, itemMain, acqCount):
         '''
 
         page = tz.decodeForThisSys(acqHtml(urlT))
@@ -189,19 +197,16 @@ class MySpiderBase:
         while True:
 
             if self.acqCertainItemsIsDone and self.certainItems.empty():
-
                 self.wrapper.commit()
 
                 print 'saveCertainItems done in %s' % threading.currentThread().name
 
                 return
 
-
             try:
                 item = self.certainItems.get(timeout=10)
             except:
                 continue
-
 
             try:
                 self.wrapper.add(item)

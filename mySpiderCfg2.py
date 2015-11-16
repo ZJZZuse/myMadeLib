@@ -7,36 +7,22 @@ class MySpiderCfg(object):
     自有蜘蛛简单配置类
     '''
     name = 'default'
-
     baseUrl = '基础地址，通常用于页面省略地址补全'
 
     specialMainActionUrl = ()
 
     mainActionUrl = False
-
     # such as mainActionUrls = ({'url': '', 'range': range(1,3 + 1)},)
     mainActionUrls = ()
 
     baseFilePath = 'F:/more/illusion/other/ling/other/text/aisirenText2/%s.txt'
 
+    def __init__(self, **p):
 
-
-    def __init__(self, baseUrl, mainActionUrl, range=range(0, 1), baseFilePath=None, name='default'):
-
-        self.baseUrl = baseUrl
-        self.mainActionUrl = mainActionUrl
-        self.baseFilePath = baseFilePath
-        self.name = name
-        self.range = range
+        for key in p:
+            self.__setattr__(key,p[key])
 
         self._generateIter()
-
-    # def __init__(self, **p):
-    #
-    #     for key in p:
-    #         self.__setattr__(key,p[key])
-    #
-    #     self._generateIter()
 
     def _generateIter(self):
         self.iter = self.generateIter()
