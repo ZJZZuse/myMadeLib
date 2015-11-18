@@ -62,7 +62,7 @@ class MySpiderT(mySpiderBase.MySpiderBase):
         return objT['Data']['List']
         # return pq(page).find('.art-list-txt li a')
 
-    def preDealWithItem(self,item):
+    def preDealWithItem(self, item):
         return item
 
     def acqMainItemsPutToQ(self, item):
@@ -73,14 +73,15 @@ class MySpiderT(mySpiderBase.MySpiderBase):
             return
 
         if item['Title'] != '':
-
             objT = {
                 'url': self.baseUrl + str(item['Code']),
-                'parentTypeName':item['ParentName'],
+                'parentTypeName': item['ParentName'],
                 'typeName': item['Name'],
                 'title': item['Title'],
                 'author': item['AuthorName'],
-                'publishTime': datetime.datetime.strptime(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(int( item['CreateTime'][6:-5])) ), "%Y-%m-%d %H:%M:%S")  ,
+                'publishTime': datetime.datetime.strptime(
+                    time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(int(item['CreateTime'][6:-5]))),
+                    "%Y-%m-%d %H:%M:%S"),
                 'viewCount': 0,
                 'content': ''
             }
@@ -122,10 +123,12 @@ class MySpiderT(mySpiderBase.MySpiderBase):
 
 if __name__ == '__main__':
     t = MySpiderT()
-    t.run()
+    # t.run()
 
-    # t.wrapper.exportTxt('D:/data/text/askTao', lambda (ele): ele.title, lambda (ele): tz.replaceCRLF(ele.content),
-    #                     t.wrapper.goalClass.q.title.contains(u'钱'))
+    t.wrapper.exportTxt('D:/data/text/askTao/money',
+                        lambda (ele): ele.publishTime.strftime("%Y-%m-%d") + '_' + ele.title,
+                        lambda (ele): tz.replaceCRLF(ele.content),
+                        AND(t.wrapper.goalClass.q.title.contains(u''),t.wrapper.goalClass.q.publishTime.__gt__(datetime.datetime(2015,5,5))))
 
     # url = 'http://wanwd.gyyx.cn/article/4696'
     #

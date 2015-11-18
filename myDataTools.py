@@ -101,7 +101,7 @@ class DataWrapper:
         for item in items:
             self.add(item)
 
-    def exportTxt(self, dirName, getFileName, getFileContent, selectP):
+    def exportTxt(self, dirName, getFileName, getFileContent, selectP,encoding = 'utf-8'):
 
         tz.mkDir(dirName)
 
@@ -112,8 +112,8 @@ class DataWrapper:
         wrongs = []
 
         for ele in objs:
-            fileName = getFileName(ele).decode('utf-8')
-            content = getFileContent(ele).decode('utf-8')
+            fileName = getFileName(ele).decode(encoding)
+            content = getFileContent(ele).decode(encoding)
 
             try:
                 tz.writeFile(dirName + '/%s.txt' % fileName, content)
@@ -125,7 +125,7 @@ class DataWrapper:
                 # raise e
 
         lenT = objs.count()
-        print '%d/%d,success,%d failed.failed @ %s'%(successCount,lenT,wrongCount,wrongs)
+        print '%d/%d,%d failed @ %s'%(successCount,lenT,wrongCount,wrongs)
 
 
     @classmethod
