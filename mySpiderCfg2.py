@@ -17,7 +17,7 @@ class MySpiderCfg(object):
 
     baseFilePath = 'F:/more/illusion/other/ling/other/text/aisirenText2/%s.txt'
 
-    def __init__(self, **p):
+    def __init__(self, p):
 
         for key in p:
             self.__setattr__(key,p[key])

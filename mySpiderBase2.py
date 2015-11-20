@@ -5,7 +5,7 @@ import mySpiderTools
 import mySpiderTools2
 import myDataTools
 from pyquery import PyQuery as pq
-import mySpiderCfg
+import mySpiderCfg2
 from sqlobject import *
 import myCommonToolsZ as tz
 
@@ -88,9 +88,7 @@ class MySpiderBase:
 
         self.mainItems = Queue.Queue(self.mainItemsSize)
         self.certainItems = Queue.Queue(self.certainItemsSize)
-        self.mySpiderCfgMain = mySpiderCfg.MySpiderCfg(self.mySpiderCfgCfg)
-
-        self.mySpiderCfgMain.specialMainActionUrl = self.specialMainActionUrl
+        self.mySpiderCfgMain = mySpiderCfg2.MySpiderCfg(self.mySpiderCfgCfg)
 
         self.mySpiderCfgMain.savedCount = 0
         self.mySpiderCfgMain.acqCount = 0
