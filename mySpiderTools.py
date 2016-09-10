@@ -5,8 +5,8 @@ import urllib
 import sys
 import socket
 import myCommonToolsZ as zTools
-import html2text
 import os
+import html2text
 import mySpiderCfg
 
 '''
