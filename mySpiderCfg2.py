@@ -15,7 +15,7 @@ class MySpiderCfg(object):
     # such as mainActionUrls = ({'url': '', 'range': range(1,3 + 1)},)
     mainActionUrls = ()
 
-    baseFilePath = 'F:/more/illusion/other/ling/other/text/aisirenText2/%s.txt'
+    baseFilePath = 'F:/more/%s.txt'
 
     def __init__(self, p):
 
